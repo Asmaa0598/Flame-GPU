@@ -1,0 +1,86 @@
+// ---------------------------------------------------------------------------------
+/* ac3804 Notes: 
+- Need to add safety measure such that if the number of files infile < outfile, then the remaining files need to be deleted after all the lines in infile have been copied.
+- Come up with a memory representation set up
+- Types of reactions added to the template after tested (third body, Fall-off, Pressure dependent Arrhenius (PLOG), fitted order, Chebyshev)
+- https://akrmys.com/public/chemkin/CKm_inp.html.en (See for specifications) 
+ */
+// ---------------------------------------------------------------------------------
+
+#include<iostream>
+#include<fstream>
+#include<filesystem>
+#include<string>
+#include<vector>
+
+using namespace std;
+
+// Function to modify the line containg the token:
+void copyTOoutput(string& theLine, vector<string> token, vector<string> toReplace, int index) {
+
+  if (theLine.find(token[index]) != string::npos) {
+    while (theLine.find(token[index]) != string::npos) 
+	theLine.replace(theLine.find(token[index]), token[index].length(), toReplace[index]);
+  }      
+}
+
+int main() {
+
+  // The variables to be replaced: ---------------------------------------------------
+  vector<string> variables;
+  variables.push_back("7");
+  variables.push_back("3");
+  variables.push_back(" {\"N\", \"NO\", \"N2\", \"O\", \"O2\", \"H\", \"OH\"}; ");
+  variables.push_back(" { 0.001, 0.0002, 0.02 }; ");
+  variables.push_back(" { 200.0, 1000.0, 6000.0 }; ");
+  variables.push_back(" { 200.0, 1000.0, 6000.0, 2.0, 6.0, 8.0, 7.0 }; ");
+  variables.push_back(" { 200.0, 1000.0, 6000.0, 2.0, 6.0, 8.0, 7.0 }; ");
+  variables.push_back(" { 200.0, 1000.0, 6000.0, 2.0, 6.0, 8.0, 7.0 }; ");
+  variables.push_back(" {\n    {vr, vr},\n    {vr, vr} \n   };"); //4 space
+  variables.push_back(" vp;");
+  variables.push_back(" Arr;");
+  variables.push_back(" beta;");
+  variables.push_back(" Ta;");
+  variables.push_back(" 1900.0;");
+  variables.push_back(" 1E+05;");
+  variables.push_back( "{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};");
+
+  const int numVar = 15;
+  // ---------------------------------------------------------------------------------
+  string lines;
+
+  ifstream infile;
+  ofstream outfile;
+
+  infile.open("template.c");
+
+  // Remove outfile if it already exist:
+  if (filesystem::remove("omegaCode.c"))
+    cout << "Deleted previous file" << endl;
+  else
+    cout << "The file is not found, creating new one" << endl; 
+
+  outfile.open("omegaCode.c");
+
+  // Counting number of lines that has '@'
+
+  int numlines = 0;
+
+  vector<string> tokens= {"@nsp","@nr", "@names", "@wk", "@Tnasa", "@nasaL", "@nasaU", "@Hf", "@vr", "@vp", "@A", "@beta", "@Ta", "@T", "@P", "@Yk" };
+
+  while ( getline(infile, lines) ) {
+    
+    for (int i=0; i<numVar; ++i)
+      copyTOoutput(lines, tokens, variables, i);
+
+    outfile << lines << "\n";    
+  }
+  
+  cout << "number of lines that contain '@' is : " << numlines << endl;
+
+  infile.close();
+  outfile.close();
+
+  return 0;
+  
+}

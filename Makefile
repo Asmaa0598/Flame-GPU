@@ -1,0 +1,24 @@
+#My first Makefile
+#-------------------------------------------------------------------------------
+#My compiler
+CC=g++
+#Flags
+CFLAGS= -g -Wall # Wall: is used to turn on most compiler warnings.
+#g: to add debugging in to the compiler
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+OBJTS = test.o # All my object files that make the executable are here
+
+#My executable
+test : $(OBJTS)
+	$(CC) $(CFLAGS) -o test $(OBJTS)
+
+#-------------------------------------------------------------------------------
+#Dependencies that build the objects files
+test.o= myObjects.h test.cc
+
+#-------------------------------------------------------------------------------
+#To delete the executable file and all the object files from the directory with the command: make clean
+clean:
+	rm test $(OBJTS)
