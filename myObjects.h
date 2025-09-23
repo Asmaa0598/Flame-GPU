@@ -17,6 +17,7 @@ class Species {
   vector<tuple<int,int>> numElements;
  
   double moleweight;
+  double hf; // Enthalpy of formation at 298.75K in J/mol
   double nasaUp[9];
   double nasaLow[9]; 
 
@@ -56,10 +57,24 @@ public:
       cout << "It contains " << get<1>(tuple) << " of element " << get<0>(tuple) << endl;
     }
   }
-
-  // Getter for specie's name:
-  string getname() {
+  // -------------------- Getters --------------------//
+  //
+  string getname() {  // Getter for specie's name
     return name;
   }
+  double getwk() { // Getter for molecular weight
+    return moleweight;
+  }
+  double getHf() { // Getter for Enthalpy of formation
+    return hf;
+  }
+
+  // -------------------- Setters --------------------
+  // Set the species molecular weight:
+  void setwk(double wK) {
+    moleweight = 0.001*wK; // To covert to kg/mol
+  }
+  // Set the species enthalpy of formation:
+  void setHf(double hF) { hf = hF; }
 };
 

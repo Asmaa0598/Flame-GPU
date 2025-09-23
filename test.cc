@@ -73,7 +73,8 @@ int main() {
       }
       
       else if (line == "SPECIES") {
-	
+
+	// Read the involved species
 	while (getline(mechfile, line) && line != "END" ){
 
 	  string entry;
@@ -88,6 +89,8 @@ int main() {
 	  }  
 	  }
 
+	// Fetch the molecular weight and NASA coefficients and the enthalpy of 
+	// formation of the species at 298.15 K from the thermal data
 	thermofile.open(thermdata);
 	string thermline;
 	// counting lines:
@@ -97,9 +100,24 @@ int main() {
 	  string entry;
 	  ++linenum;
 	  ss >> entry;
-	  for(int k=0; k<numSP-1 ; ++k) {
+	  for(int k=0; k<numSP ; ++k) {
 	      if (entry == mySpecies[k].getname()) {
 		cout << "Found " << entry << " at " << linenum << endl;
+		// Move to the next line, the 1st and 2nd entry from the right
+		// are the enthalpy of dormation and the molecular weight:
+		getline(thermofile, thermline);
+		++linenum;
+		reverse(thermline.begin(), thermline.end());  
+		stringstream moleW(thermline);
+		moleW >> entry;
+		reverse(entry.begin(), entry.end());
+		double hFtest = stod(entry); 
+		moleW >> entry;
+		reverse(entry.begin(), entry.end());
+		double wTest = stod(entry);
+		
+		mySpecies[k].setHf(hFtest);
+		mySpecies[k].setwk(wTest);
 		speAvail[k] = 1.0;
 		break;
 	      }
@@ -129,8 +147,11 @@ int main() {
 
     cout << "\n\nAvailable Species in thermo data: " << endl;
     for (int k=0; k<numSP; ++k) {
-      if (speAvail[k] == 1.0 )
+      if (speAvail[k] == 1.0 ) {
 	cout << " Species " << mySpecies[k].getname() << " was found in " << thermdata << endl;
+	cout << "  The molecular weight is " << mySpecies[k].getwk() << " kg/mol"
+	     << " and its enthalpy of formation is " << mySpecies[k].getHf() << " J/mol" << endl;
+      }
       else
 	cout << " Species " << mySpecies[k].getname() << " was not found in " << thermdata << endl;
     }
