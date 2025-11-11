@@ -31,6 +31,7 @@
 using namespace std;
 
 void getnasa9(std::array<double,9> &myarr, string coeff);
+void copyTOoutput(string& theLine, vector<string> token, vector<string> toReplace, int index);
 
 int main() {
 
@@ -158,10 +159,7 @@ int main() {
 		getline(thermofile, thermline);
 		++linenum;
 		coeffs += thermline;
-
-		cout << "\n\n\n " << coeffs << endl;
 		std::array<double, 9> nasaUP;
-		getnasa9(nasaUP, coeffs);
 		
 		mySpecies[k].setNASAup(nasaUP);
 		mySpecies[k].setNASAlow(nasaLOW);
@@ -196,31 +194,20 @@ int main() {
       Tnasa += "  { " + to_string(mySpecies[k].getTlow()) + ", " +
 	to_string(mySpecies[k].getTmid()) + ", " +
 	to_string(mySpecies[k].getTup()) +" }, \n";
-      
       nasa9low += " { " ;
-      for (int i=0; i<8; ++i)
+      for (int i=0; i<9; ++i)
 	nasa9low += to_string(mySpecies[k].getNASAlowID(i)) + ", ";
-      nasa9low +=  to_string(mySpecies[k].getNASAlowID(8)) + " }, \n";
-      
-      nasa9up += " { " ;
-      for (int i=0; i<8; ++i)
-	nasa9up += to_string(mySpecies[k].getNASAupID(i)) + ", ";
-      nasa9up += to_string(mySpecies[k].getNASAupID(8)) + " }, \n";
+      nasa9low += " }, \n";
     }
-    
     names = names + "\"" + mySpecies[numSP-1].getname()+ "\"}; ";
     wks = wks + to_string(mySpecies[numSP-1].getwk()) + " }; ";
     Tnasa += "  { " + to_string(mySpecies[numSP-1].getTlow()) + ", " +
 	to_string(mySpecies[numSP-1].getTmid()) + ", " +
 	to_string(mySpecies[numSP-1].getTup()) +" } \n }; ";
     nasa9low += " { " ;
-    for (int i=0; i<8; ++i)
+    for (int i=0; i<9; ++i)
 	nasa9low += to_string(mySpecies[numSP-1].getNASAlowID(i)) + ", ";
-    nasa9low += to_string(mySpecies[numSP-1].getNASAlowID(8)) + " } \n }; ";
-    nasa9up += " { " ;
-    for (int i=0; i<8; ++i)
-	nasa9up += to_string(mySpecies[numSP-1].getNASAupID(i)) + ", ";
-    nasa9up += to_string(mySpecies[numSP-1].getNASAupID(8)) + " } \n }; ";
+    nasa9low += " } \n }; ";
     
 
     variables.push_back(to_string(numSP));
@@ -229,11 +216,10 @@ int main() {
     variables.push_back(wks);
     variables.push_back(Tnasa);
     variables.push_back(nasa9low);
-    variables.push_back(nasa9up);
     
     cout << "strings to replace the tokens: " << endl;
     for (const std::string& v : variables) {
-      std::cout << '\n' << v << std::endl;
+            std::cout << v << std::endl;
     }
 
     cout << "\n\nAvailable Species in thermo data: " << endl;
@@ -267,16 +253,12 @@ int main() {
 // --------------------------------------------------------------------------------
 
 void getnasa9(std::array<double,9> &myarr, string coeff) {
-  int minusOne = 0; 
   for(int i=0; i<10*16; i += 16) {
-    if (i/16 == 7) {
-      minusOne = -1; 
-      continue;
-    }
-    else {
        string base{};
        string exponent{};
        bool divider = true;
+	  if (i== 7*16)
+	     continue;
 		  
        for(int  j=i; j<i+16; ++j) {
 	     if (coeff[j] == 'D') {
@@ -291,10 +273,18 @@ void getnasa9(std::array<double,9> &myarr, string coeff) {
 	     else
 		exponent += coeff[j];
 	}
-       myarr[i/16+minusOne] = stod(base) * pow(10,stod(exponent));
-    }
+        myarr[i/16] = stod(base) * pow(10,stod(exponent));
    }
 
+}
+
+// Function to modify the line containg the token:
+void copyTOoutput(string& theLine, vector<string> token, vector<string> toReplace, int index) {
+
+  if (theLine.find(token[index]) != string::npos) {
+    while (theLine.find(token[index]) != string::npos) 
+	theLine.replace(theLine.find(token[index]), token[index].length(), toReplace[index]);
+  }      
 }
 
 /*
