@@ -230,7 +230,8 @@ int main() {
   double T = 1900.0;
   double P = 1.1065E+05;
 
-  double Yk[nsp] = { 2.31141, 2.31141, 0.0, 2.38145, 0.0, 0.0, 0.0 };
+  //double Yk[nsp] = { 2.31141, 2.31141, 0.0, 2.38145, 0.0, 0.0, 0.0 };
+  double Yk[nsp] = { 0.231527, 0.495993, 0.0, 0.27248, 0.0, 0.0, 0.0 };
   //double Yk[nsp] = { 0.5, 0.3, 0.0, 0.2, 0.0, 0.0, 0.0 };
   double R = 0.0;
   for (int k=0; k<nsp; ++k) R += Yk[k]/wk[k];
@@ -272,8 +273,11 @@ int main() {
   
   // Calculating kb,r:
   double kback[nr];
-  for (int r=0; r<nr; ++r)
+  printf("\n Backward coefficients: \n");
+  for (int r=0; r<nr; ++r) {
     kback[r] = kcoeff[r]/KcEq[r];
+    printf("kb,%d: %g \n", r, kback[r]);
+  }
 
   //---------------------------- Production rate ------------------------------------//
   double omega[nsp] = {0.0};

@@ -26,6 +26,7 @@
 // --------------------------------------------------------------------------------
 
 #include "myObjects.h"
+#include <iomanip>
 #include <cmath>
 
 using namespace std;
@@ -188,6 +189,7 @@ int main() {
     string names = {" {"};
     string wks = { " { " };
     string Tnasa = { "{ \n" };
+    
     string nasa9low = { "{ \n" };
     string nasa9up = { "{ \n" };
     for (int k=0; k<numSP-1; ++k) {
@@ -203,9 +205,15 @@ int main() {
       nasa9low +=  to_string(mySpecies[k].getNASAlowID(8)) + " }, \n";
       
       nasa9up += " { " ;
-      for (int i=0; i<8; ++i)
-	nasa9up += to_string(mySpecies[k].getNASAupID(i)) + ", ";
-      nasa9up += to_string(mySpecies[k].getNASAupID(8)) + " }, \n";
+      for (int i=0; i<8; ++i){
+	stringstream ss; // for doubles precision
+	ss << setprecision(10) << mySpecies[k].getNASAupID(i);
+	nasa9up += ss.str() + ", ";
+      }
+      stringstream ss; // for doubles precision
+      ss << setprecision(10) << mySpecies[k].getNASAupID(8);
+      //ss >> str;
+      nasa9up += ss.str() + " }, \n";
     }
     
     names = names + "\"" + mySpecies[numSP-1].getname()+ "\"}; ";
@@ -218,9 +226,15 @@ int main() {
 	nasa9low += to_string(mySpecies[numSP-1].getNASAlowID(i)) + ", ";
     nasa9low += to_string(mySpecies[numSP-1].getNASAlowID(8)) + " } \n }; ";
     nasa9up += " { " ;
-    for (int i=0; i<8; ++i)
-	nasa9up += to_string(mySpecies[numSP-1].getNASAupID(i)) + ", ";
-    nasa9up += to_string(mySpecies[numSP-1].getNASAupID(8)) + " } \n }; ";
+   
+    for (int i=0; i<8; ++i) {
+      stringstream ss; // for doubles precision
+      ss << setprecision(10) << mySpecies[numSP-1].getNASAupID(i);
+      nasa9up += ss.str() + ", ";
+    }
+    stringstream ss; // for doubles precision
+    ss << setprecision(10) << mySpecies[numSP].getNASAupID(8);
+    nasa9up += ss.str() + " } \n }; ";
     
 
     variables.push_back(to_string(numSP));
