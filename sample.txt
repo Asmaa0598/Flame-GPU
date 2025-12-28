@@ -5,3 +5,7 @@ END
 SPECIES
 N NO N2 O O2 H OH
 END
+
+REACTIONS
+H2 = H + H       A= , n= , Ea= 
+END

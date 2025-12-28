@@ -1,0 +1,33 @@
+#include "mainH2Air.h"
+
+int main() {
+
+    // Output files
+    FILE* output;
+    FILE* measurements;
+
+    // Opening the files in write mode
+    output = fopen("outputZeldovich.txt", "w");
+    measurements = fopen("costZeldovich.txt", "w");
+
+    // --------------------------------------------------------------------------------
+    // number of iterations
+    const int nIter = 10;
+    // ranges limits
+    const double minT = 300.0;
+    const double maxT = 3500.0;
+    const double minP = 1.0e+04;
+    const double maxP = 1.0e+08;
+    // creating the temperature and pressure arrays:
+    double T[nIter];
+    double P[nIter];
+    for (int i = 0; i < nIter; i++) T[i] = rand() % (maxT - minT + 1) + minT;
+    for (int i = 0; i < nIter; i++) P[i] = rand() % (maxP - minP + 1) + minP;
+
+
+    // --------------------------------------------------------------------------------
+    double omega[nsp] = {0.0};
+
+    
+  return 0; 
+}

@@ -39,8 +39,8 @@ int main() {
   vector<string> variables;
 
   // My test input file:
-  const string sample = {"sample.txt"};
-  const string thermdata = {"nasa9.dat"};
+  const string sample = {"Evans.txt"};
+  const string thermdata = {"nasa9-other.dat"};
   ifstream mechfile;
   ifstream thermofile;
   mechfile.open(sample);
@@ -91,7 +91,6 @@ int main() {
 	    ++numSP;
 	  }  
 	}
-
 	// Fetch the molecular weight and NASA coefficients and the enthalpy of 
 	// formation of the species at 298.15 K from the thermal data
 	thermofile.open(thermdata);
@@ -160,7 +159,7 @@ int main() {
 		++linenum;
 		coeffs += thermline;
 
-		cout << "\n\n\n " << coeffs << endl;
+		//cout << "\n\n\n " << coeffs << endl;
 		std::array<double, 9> nasaUP;
 		getnasa9(nasaUP, coeffs);
 		
@@ -177,10 +176,27 @@ int main() {
 		break;
 	      }
 	    }
-	   
 	}
 	thermofile.close(); 
       }
+      
+      else if (line == "REACTIONS          ") {
+
+	cout << "Reading reactions" << endl;
+
+	// Read the reactions:
+	while (getline(mechfile, line) && line != "END" ){
+	  // Skip commented lines:
+	  if (line[0] == '!') {
+	    cout << "Found commented line!" << endl;
+	    continue;
+	  }
+	  
+	}
+      }
+
+      //cout << "SEE HERE" << endl; 
+      
     }
 
     // Create the variable that are going to replace the token:
@@ -200,11 +216,17 @@ int main() {
 	to_string(mySpecies[k].getTup()) +" }, \n";
       
       nasa9low += " { " ;
-      for (int i=0; i<8; ++i)
-	nasa9low += to_string(mySpecies[k].getNASAlowID(i)) + ", ";
-      nasa9low +=  to_string(mySpecies[k].getNASAlowID(8)) + " }, \n";
+      for (int i=0; i<8; ++i) {
+	stringstream ll; // for doubles precision
+	ll << setprecision(10) << mySpecies[k].getNASAlowID(i);
+	nasa9low += ll.str() + ", ";
+      }
+      stringstream ll; // for doubles precision
+      ll << setprecision(10) << mySpecies[k].getNASAupID(8);
+      nasa9low +=  ll.str() + " }, \n";
       
       nasa9up += " { " ;
+      
       for (int i=0; i<8; ++i){
 	stringstream ss; // for doubles precision
 	ss << setprecision(10) << mySpecies[k].getNASAupID(i);
@@ -221,12 +243,18 @@ int main() {
     Tnasa += "  { " + to_string(mySpecies[numSP-1].getTlow()) + ", " +
 	to_string(mySpecies[numSP-1].getTmid()) + ", " +
 	to_string(mySpecies[numSP-1].getTup()) +" } \n }; ";
+    
     nasa9low += " { " ;
-    for (int i=0; i<8; ++i)
-	nasa9low += to_string(mySpecies[numSP-1].getNASAlowID(i)) + ", ";
-    nasa9low += to_string(mySpecies[numSP-1].getNASAlowID(8)) + " } \n }; ";
+    for (int i=0; i<8; ++i){
+      stringstream ll; // for doubles precision
+      ll << setprecision(10) << mySpecies[numSP-1].getNASAlowID(i);
+      nasa9low += ll.str() + ", ";
+    }
+    stringstream ll; // for doubles precision
+    ll << setprecision(10) << mySpecies[numSP-1].getNASAlowID(8);
+    nasa9low += ll.str() + " } \n }; ";
+
     nasa9up += " { " ;
-   
     for (int i=0; i<8; ++i) {
       stringstream ss; // for doubles precision
       ss << setprecision(10) << mySpecies[numSP-1].getNASAupID(i);

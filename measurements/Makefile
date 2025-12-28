@@ -8,7 +8,7 @@ CFLAGS= -g -Wall # Wall: is used to turn on most compiler warnings.
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-OBJTS = test.o # All my object files that make the executable are here
+OBJTS = measure.o # All my object files that make the executable are here
 
 #My executable
 test : $(OBJTS)
@@ -16,7 +16,7 @@ test : $(OBJTS)
 
 #-------------------------------------------------------------------------------
 #Dependencies that build the objects files
-test.o= myObjects.h reactionMech.h test.cc
+test.o= mainCopy.h measure.cc
 
 #-------------------------------------------------------------------------------
 #To delete the executable file and all the object files from the directory with the command: make clean
