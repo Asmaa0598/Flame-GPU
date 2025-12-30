@@ -38,8 +38,8 @@ gcc main.c -o main -lm
 // Arrhenius coefficient
 void  k_coeff(double* k, double* As, float* betas, double* Tas, double T) {
 
-  for (int r=0; r<nr; r++) k[r] = As[r]*pow(T,betas[r])*exp(-Tas[r]/T);
-  for (int r=0; r<nr; r++) printf("At reaction %d with A=%g, beta=%f, and Ta=%g, kf = %g\n", r, As[r], betas[r], Tas[r], k[r]);
+  for (int r=0; r<nr; ++r) k[r] = As[r]*pow(T,betas[r])*exp(-Tas[r]/T);
+  //for (int r=0; r<nr; ++r) printf("%g\n", k[r]);
 }
 
 // Returning the adequate NASA coefficient: // Ignore the case where the temp is lower or higher than the range
@@ -94,13 +94,13 @@ void Kceq(double* Kc, int vnet[][nr], double nasaCoeff[][nasaC], double T) {
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-int main() {
+void h2air(double* omega, double Ts, double Ps, double Yk[nsp]) {
    //---------------------------- Initial conditions ---------------------------------//
-  double T = 1900.0;
-  double P = 1.1065E+05;
+  double T = Ts;
+  double P = Ps;
 
   //double Yk[nsp] = { 2.31141, 2.31141, 0.0, 2.38145, 0.0, 0.0, 0.0 };
-  double Yk[nsp] = { 0.33, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.33, 0.0, 0.34, 0.0, 0.0, 0.0 };
+ 
   //double Yk[nsp] = { 0.5, 0.3, 0.0, 0.2, 0.0, 0.0, 0.0 };
   //---------------------------------------------------------------------------------//
 
@@ -170,8 +170,10 @@ int main() {
 
   
   //------------------------------ Mechanism Details ---------------------------------//
+  //const int nsp=7; // Number of species
+  //const int nr=6; // 3 reversible reactions = 6 irreversible reactions.
 
-  // The matrix of reactants coefficients:
+   // The matrix of reactants coefficients:
   int vreact[nsp][nr] = {
     { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0 }, //H2
     { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 }, //H
@@ -209,7 +211,7 @@ int main() {
   // The array of the pre-exponent factor:
   double A[nr] = { 5.2E+15, 5.5E+12, 7.2E+12, 8.5E+12, 1.7E+10, 5.0E+12, 1.1E+10, 5.8E+07, 8.4E+07, 2.2E+08, 7.5E+07, 1.7E+05, 1.9E+07, 2.0E+05, 3.7E+05, 1.7E+07, 5.8E+05, 1.2E+06, 5.0E+07, 1.7E+08, 2.4E+05, 2.0E+05, 1.0E+06, 2.4E+07, 1.0E+05 };
   
-   // The array of the powers beta:
+  // The array of the powers beta:
   float beta[nr] = {-1.5, -1.0, -1.0, -1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.64, 0.0, 0.5, 0.21, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.5 };
 
   // The array of activation temperature:
@@ -218,15 +220,13 @@ int main() {
   // Array of third body efficiencies
    double M[nr] = {1.0, 1.0 , 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
-  // Reversibility:
+   // Reversibility:
    float reversibility[nr] =  {1.0, 1.0 , 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
-  
+   
   //---------------------------------------------------------------------------------//
   
   //------------------------------ Arrhenuis Law ------------------------------------//
-
-  clock_t start_time = clock();
   
   double R = 0.0;
   for (int k=0; k<nsp; ++k) R += Yk[k]/wk[k];
@@ -258,20 +258,13 @@ int main() {
 
   double KcEq[nr];
   Kceq(KcEq, &vnet[0], &nasa9[0], T);
-
-  /*
-  // Displaying Kc:
-  printf("\n\nEquilibrium Constant Kc:\n");
-  for (int r=0; r<nr; ++r)
-    printf("Kc,%d is %g \n", r, KcEq[r]);
-  */
   
   // Calculating kb,r:
   double kback[nr];
-  printf("\n Backward coefficients: \n");
+  //printf("\n Backward coefficients: \n");
   for (int r=0; r<nr; ++r) {
     kback[r] = kcoeff[r]/KcEq[r];
-    printf("kb,%d: %g \n", r, kback[r]); 
+    //printf("kb,%d: %g \n", r, kback[r]); 
   }
 
   //---------------------------- Production rate ------------------------------------//
@@ -302,64 +295,5 @@ int main() {
     omega[k] = wk[k]*tmp[k];
   }
   //--------------------------------------------------------------------------------//
-   clock_t end_time = clock();
-
-   // Calculate elapsed time in seconds
-    double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-
-  // Printing results:
-  for (int k=0; k<nsp; ++k) printf("Production rate of %3s is %e \n", names[k], omega[k]);
-  printf("Execution time: %f seconds\n", elapsed_time);
-  
-
-  
-  return 0;
-
 
 }
-
-
-
-/*
-  //---------------------------- Production rate ------------------------------------//
-
-  // Displaying NASA coefficients:
-  printf("Coefficients:");
-  for (int k=0; k<nsp; ++k){
-    printf("\n\n%3s:\n ", names[k]);
-    for (int i=0; i<7; ++i)
-      printf("%g   ", nasa7[k][i]);
-  }
-
- 
-
-
- double omega[nsp] = {0.0};
-  double tmp[nsp] = {0.0};
-
-  double RR[nr] = {1.0};
-  for (int r=0; r<nr; ++r) {
-    RR[r] = 1.0;
-    printf("\nFor r=%d: \n", r);
-    for (int k=0; k<nsp; ++k){
-      printf("[%3s]=%g, with v%d%d=%d  gives:%g  \n", names[k], concentrations_IC[k], k, r, vreact[k][r], pow(concentrations_IC[k], vreact[k][r]));
-      RR[r] *= pow(concentrations_IC[k], vreact[k][r]);
-    }
-    if (r ==3 ) printf("before: %g \n", RR[r]);
-    RR[r] *= kcoeff[r];
-    printf("\nReaction rate of %d is %g and k=%g \n", r, RR[r], kcoeff[r]);
-  }
-  
-  for (int k=0; k<nsp; ++k) {
-    for (int r=0; r<nr; ++r) {
-  universal gas constant    tmp[k] += vnet[k][r]*RR[r];
-    }
-    omega[k] = wk[k]*tmp[k];
-  }
-  //--------------------------------------------------------------------------------//
-
-  // Printing results:
-   for (int k=0; k<nsp; ++k) printf("Production rate of %3s is %g \n", names[k], omega[k]);
-  
-
- */

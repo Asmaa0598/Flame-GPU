@@ -1,5 +1,7 @@
 #include "mainCopy.h"
+#include "mainH2Air.h"
 #include <time.h>
+
 
 int main() {
   srand((unsigned int)time(NULL));
@@ -9,8 +11,8 @@ int main() {
     FILE* measurements;
 
     // Opening the files in write mode
-    output = fopen("outputZeldovich.txt", "a");
-    measurements = fopen("costZeldovich.txt", "a");
+    output = fopen("output.txt", "a");
+    measurements = fopen("cost.txt", "a");
 
     // --------------------------------------------------------------------------------
     // number of iterations
@@ -21,8 +23,8 @@ int main() {
     const double minP = 1.0e+04;
     const double maxP = 1.0e+08;
     // creating the temperature and pressure arrays:
-    double T[nIter];
-    double P[nIter];
+    double* T = (double*) calloc(nIter, sizeof(double));
+    double* P = (double*) calloc(nIter, sizeof(double));
     for (int i = 0; i < nIter; i++){
       T[i] = (double)rand() / (double)RAND_MAX; 
       T[i] = minT + T[i] * (maxT - minT); 
@@ -32,7 +34,8 @@ int main() {
       P[i] = minP + P[i] * (maxP - minP); 
     }
     // The mass fractions array:
-    double Y[nsp] = { 0.231527, 0.495993, 0.0, 0.27248, 0.0, 0.0, 0.0 };
+    double Y1[nsp] = { 0.031527, 0.095993, 0.1, 0.27248, 0.13, 0.17, 0.2 };
+    double Y2[nsp] = { 0.33, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.33, 0.0, 0.34, 0.0, 0.0, 0.0 };
     // --------------------------------------------------------------------------------
     // Mechanism specific information 
 
@@ -44,6 +47,7 @@ int main() {
     // main loop
     for (int i=0; i<nIter; ++i) {
       zeldovich(omegas, T[i], P[i], &Y[0]);
+      h2air(omegas, T[i], P[i], &Y[0]);
     }
     clock_t end_time = clock();
     // Calculate elapsed time in seconds
@@ -59,5 +63,5 @@ int main() {
    fprintf(output, "\n");
 
     
-  return 0; 
+   return 0; 
 }
